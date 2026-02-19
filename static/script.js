@@ -1,62 +1,66 @@
-class ItemManager {
+class DulceriaManager {
     constructor() {
-        this.items = JSON.parse(localStorage.getItem('items')) || [];
+        this.dulces = JSON.parse(localStorage.getItem('dulces')) || [];
     }
 
-    getAll() {
-        return this.items;
+    obtenerTodos() {
+        return this.dulces;
     }
 
-    get(id) {
-        return this.items.find(item => item.id === id);
+    obtener(id) {
+        return this.dulces.find(d => d.id === id);
     }
 
-    add(item) {
-        item.id = Date.now().toString(); // Simple ID generation
-        this.items.push(item);
-        this.save();
+    agregar(dulce) {
+        dulce.id = Date.now().toString();
+        this.dulces.push(dulce);
+        this.guardar();
     }
 
-    update(id, updatedItem) {
-        const index = this.items.findIndex(item => item.id === id);
+    actualizar(id, dulceActualizado) {
+        const index = this.dulces.findIndex(d => d.id === id);
         if (index !== -1) {
-            this.items[index] = { ...this.items[index], ...updatedItem };
-            this.save();
+            this.dulces[index] = { ...this.dulces[index], ...dulceActualizado };
+            this.guardar();
         }
     }
 
-    delete(id) {
-        this.items = this.items.filter(item => item.id !== id);
-        this.save();
+    eliminar(id) {
+        this.dulces = this.dulces.filter(d => d.id !== id);
+        this.guardar();
     }
 
-    save() {
-        localStorage.setItem('items', JSON.stringify(this.items));
+    guardar() {
+        localStorage.setItem('dulces', JSON.stringify(this.dulces));
     }
 }
 
-const itemManager = new ItemManager();
+const manager = new DulceriaManager();
 const app = document.getElementById('app');
 
 function renderHome() {
-    const items = itemManager.getAll();
+    const dulces = manager.obtenerTodos();
     app.innerHTML = `
         <nav>
-            <a href="#" onclick="renderHome()">Home</a>
-            <a href="#" onclick="renderCreate()">Add Item</a>
+            <a href="#" onclick="renderHome()">🍭 Inicio</a>
+            <a href="#" onclick="renderCreate()">➕ Agregar Dulce</a>
         </nav>
         <div class="content">
-            <h1>Items</h1>
-            ${items.length > 0 ? `
-                ${items.map(item => `
+            <h1>🍬 Inventario de Dulces 🍬</h1>
+            ${dulces.length > 0 ? `
+                ${dulces.map(dulce => `
                     <div class="item">
-                        <h2>${escapeHtml(item.name)}</h2>
-                        <p>${escapeHtml(item.description)}</p>
-                        <a href="#" onclick="renderEdit('${item.id}')">Edit</a>
-                        <a href="#" onclick="deleteItem('${item.id}')">Delete</a>
+                        <h2>${escapeHtml(dulce.nombre)}</h2>
+                        <p><strong>Tipo:</strong> ${escapeHtml(dulce.tipo)}</p>
+                        <p class="price">Precio: $${escapeHtml(dulce.precio)}</p>
+                        <p>Stock: ${escapeHtml(dulce.stock)} unidades</p>
+                        <div class="actions">
+                            <a href="#" class="btn-edit" onclick="renderEdit('${dulce.id}')">✏️ Editar</a>
+                            <a href="#" class="btn-delete" onclick="eliminarDulce('${dulce.id}')">🗑️ Borrar</a>
+                        </div>
                     </div>
                 `).join('')}
-            ` : '<p>No items found. Add one!</p>'}
+            ` : '<p style="text-align:center; font-size:1.2em;">¡No hay dulces registrados! Empieza agregando uno.</p>'}
         </div>
     `;
 }
@@ -64,39 +68,69 @@ function renderHome() {
 function renderCreate() {
     app.innerHTML = `
         <nav>
-            <a href="#" onclick="renderHome()">Home</a>
-            <a href="#" onclick="renderCreate()">Add Item</a>
+            <a href="#" onclick="renderHome()">🍭 Inicio</a>
+            <a href="#" onclick="renderCreate()">➕ Agregar Dulce</a>
         </nav>
         <div class="content">
-            <h1>Add New Item</h1>
+            <h1>✨ Nuevo Dulce ✨</h1>
             <form onsubmit="handleCreate(event)">
-                <label>Name</label>
-                <input type="text" name="name" required>
-                <label>Description</label>
-                <textarea name="description"></textarea>
-                <button type="submit">Save</button>
+                <label>Nombre del Dulce</label>
+                <input type="text" name="nombre" placeholder="Ej: Paleta Payaso" required>
+                
+                <label>Tipo / Categoría</label>
+                <select name="tipo" required>
+                    <option value="Chocolate">Chocolate</option>
+                    <option value="Caramelo">Caramelo</option>
+                    <option value="Gomita">Gomita</option>
+                    <option value="Chicle">Chicle</option>
+                    <option value="Picante">Picante</option>
+                    <option value="Otro">Otro</option>
+                </select>
+
+                <label>Precio ($)</label>
+                <input type="number" name="precio" placeholder="0.00" step="0.50" required>
+
+                <label>Cantidad en Stock</label>
+                <input type="number" name="stock" placeholder="0" required>
+
+                <button type="submit">Guardar Dulce</button>
             </form>
         </div>
     `;
 }
 
 function renderEdit(id) {
-    const item = itemManager.get(id);
-    if (!item) return renderHome();
+    const dulce = manager.obtener(id);
+    if (!dulce) return renderHome();
 
     app.innerHTML = `
         <nav>
-            <a href="#" onclick="renderHome()">Home</a>
-            <a href="#" onclick="renderCreate()">Add Item</a>
+            <a href="#" onclick="renderHome()">🍭 Inicio</a>
+            <a href="#" onclick="renderCreate()">➕ Agregar Dulce</a>
         </nav>
         <div class="content">
-            <h1>Edit Item</h1>
+            <h1>✏️ Editar Dulce</h1>
             <form onsubmit="handleEdit(event, '${id}')">
-                <label>Name</label>
-                <input type="text" name="name" value="${escapeHtml(item.name)}" required>
-                <label>Description</label>
-                <textarea name="description">${escapeHtml(item.description)}</textarea>
-                <button type="submit">Update</button>
+                <label>Nombre del Dulce</label>
+                <input type="text" name="nombre" value="${escapeHtml(dulce.nombre)}" required>
+                
+                <label>Tipo / Categoría</label>
+                <select name="tipo" required>
+                    <option value="Chocolate" ${dulce.tipo === 'Chocolate' ? 'selected' : ''}>Chocolate</option>
+                    <option value="Caramelo" ${dulce.tipo === 'Caramelo' ? 'selected' : ''}>Caramelo</option>
+                    <option value="Gomita" ${dulce.tipo === 'Gomita' ? 'selected' : ''}>Gomita</option>
+                    <option value="Chicle" ${dulce.tipo === 'Chicle' ? 'selected' : ''}>Chicle</option>
+                    <option value="Picante" ${dulce.tipo === 'Picante' ? 'selected' : ''}>Picante</option>
+                    <option value="Otro" ${dulce.tipo === 'Otro' ? 'selected' : ''}>Otro</option>
+                </select>
+
+                <label>Precio ($)</label>
+                <input type="number" name="precio" value="${escapeHtml(dulce.precio)}" step="0.50" required>
+
+                <label>Cantidad en Stock</label>
+                <input type="number" name="stock" value="${escapeHtml(dulce.stock)}" required>
+
+                <button type="submit">Actualizar Dulce</button>
             </form>
         </div>
     `;
@@ -105,33 +139,39 @@ function renderEdit(id) {
 function handleCreate(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    itemManager.add({
-        name: formData.get('name'),
-        description: formData.get('description')
+    manager.agregar({
+        nombre: formData.get('nombre'),
+        tipo: formData.get('tipo'),
+        precio: formData.get('precio'),
+        stock: formData.get('stock')
     });
+    alert('¡Dulce agregado exitosamente! 🍬');
     renderHome();
 }
 
 function handleEdit(event, id) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    itemManager.update(id, {
-        name: formData.get('name'),
-        description: formData.get('description')
+    manager.actualizar(id, {
+        nombre: formData.get('nombre'),
+        tipo: formData.get('tipo'),
+        precio: formData.get('precio'),
+        stock: formData.get('stock')
     });
+    alert('¡Dulce actualizado! ✨');
     renderHome();
 }
 
-function deleteItem(id) {
-    if (confirm('Are you sure?')) {
-        itemManager.delete(id);
+function eliminarDulce(id) {
+    if (confirm('¿Estás seguro de que quieres borrar este dulce? 😢')) {
+        manager.eliminar(id);
         renderHome();
     }
 }
 
 function escapeHtml(text) {
     if (!text) return '';
-    return text
+    return text.toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")

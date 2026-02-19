@@ -1,5 +1,5 @@
-CREATE DATABASE database.db;
-USE database.db;
+CREATE DATABASE mi_crud;
+USE mi_crud;
 
 CREATE TABLE items (
     id INT AUTO_INCREMENT PRIMARY KEY,

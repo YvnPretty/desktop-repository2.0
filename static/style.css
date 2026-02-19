@@ -42,13 +42,14 @@ h1 {
     margin-bottom: 15px;
 }
 
-input[type="text"], textarea {
+input[type="text"],
+textarea {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
 button[type="submit"] {
@@ -62,4 +63,10 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background-color: #45a049;
+}
+
+/* Add style for delete link to look like a button or distinct link */
+a[onclick] {
+    color: red;
+    margin-left: 10px;
 }
